@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter For You — Ink & Ember</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<main class="reveal-stage" id="stage">
+  <div id="embers"></div>
+
+  <div id="loadingState" class="reveal-loading">Fetching your letter…</div>
+
+  <div id="errorState" class="reveal-error" hidden>
+    This letter couldn't be found. It may have been the wrong link — ask them to resend it.
+  </div>
+
+  <div id="envelopeScene" class="envelope-scene" hidden>
+    <div class="envelope" id="envelope">
+      <div class="envelope-flap"></div>
+      <div class="envelope-body"></div>
+      <div class="envelope-seal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M4 4l8 7 8-7"/></svg>
+      </div>
+    </div>
+    <div class="envelope-hint" id="envelopeHint">Tap to break the seal</div>
+  </div>
+</main>
+
+<button class="reveal-close" id="closeBtn" aria-label="Close letter">&times;</button>
+
+<div class="reveal-letter" id="revealLetter">
+  <div class="reveal-letter-scroll parchment" id="revealScroll">
+    <div class="letter-greeting" id="rvGreeting"></div>
+    <div class="letter-body" id="rvBody"></div>
+    <div class="letter-sign" id="rvSign"></div>
+    <div class="letter-seal-mark" aria-hidden="true"></div>
+    <div class="reveal-extras" id="rvExtras" hidden></div>
+  </div>
+</div>
+
+<script type="module" src="js/letter.js"></script>
+</body>
+</html>

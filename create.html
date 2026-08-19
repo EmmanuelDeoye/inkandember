@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Write Your Letter — Ink & Ember</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="wordmark">Ink <span class="amp">&amp;</span> Ember</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#how">How it Works</a>
+      <a href="index.html#plans">Plans</a>
+    </nav>
+  </div>
+</header>
+
+<main class="composer">
+  <div class="container composer-grid">
+
+    <!-- ================= FORM PANEL ================= -->
+    <form class="composer-panel" id="letter-form">
+      <div class="eyebrow">Step 1 — Compose</div>
+      <h2>Your Letter</h2>
+
+      <div class="field">
+        <label for="senderName">Your name</label>
+        <input type="text" id="senderName" placeholder="e.g. Ada" required maxlength="60">
+      </div>
+
+      <div class="field">
+        <label for="recipientName">Their name</label>
+        <input type="text" id="recipientName" placeholder="e.g. Chike" required maxlength="60">
+      </div>
+
+      <div class="field">
+        <label for="greeting">Opening line</label>
+        <input type="text" id="greeting" placeholder="My dearest Chike," maxlength="80">
+      </div>
+
+      <div class="field">
+        <label for="message">The letter</label>
+        <textarea id="message" placeholder="Write exactly what you'd say if they were sitting across from you…" required maxlength="2500"></textarea>
+        <div class="field-hint"><span id="charCount">0</span> / 2500 characters</div>
+      </div>
+
+      <div class="field">
+        <label for="signoff">Sign-off</label>
+        <input type="text" id="signoff" placeholder="Forever yours, Ada" maxlength="80">
+      </div>
+
+      <div class="field">
+        <label>Parchment style</label>
+        <div class="swatches" id="paper-swatches">
+          <div class="swatch active" data-paper="papyrus" title="Papyrus"></div>
+          <div class="swatch" data-paper="rose" title="Rose"></div>
+          <div class="swatch" data-paper="olive" title="Olive"></div>
+          <div class="swatch" data-paper="midnight" title="Midnight"></div>
+        </div>
+      </div>
+
+      <div class="eyebrow" style="margin-top:34px;">Step 2 — Choose a Package</div>
+
+      <div class="field">
+        <label for="plan">Package</label>
+        <select id="plan">
+          <option value="ember-letter" data-price="10000" data-img="img/ember-letter.jpg">Ember Letter — ₦10,000</option>
+          <option value="ember-scroll" data-price="13000" data-img="img/ember-scroll.jpg">Ember Scroll — ₦13,000</option>
+          <option value="simple-gesture" data-price="13000" data-img="img/simple-gesture.jpg">Simple Gesture — ₦13,000</option>
+          <option value="custom-box-1" data-price="17000" data-img="img/custom-box-1.jpg">Custom Box 1 — ₦17,000</option>
+          <option value="custom-box-2" data-price="22000" data-img="img/custom-box-2.jpg">Custom Box 2 — ₦22,000</option>
+          <option value="custom-box-3" data-price="30500" data-img="img/custom-box-3.jpg">Custom Box 3 — ₦30,500</option>
+          <option value="premium-box" data-price="55000" data-img="img/premium-box.jpg">Premium Box — ₦55,000</option>
+        </select>
+      </div>
+      <div class="plan-thumb-wrap">
+        <img id="planThumb" src="img/ember-letter.jpg" alt="Selected package preview" class="plan-thumb">
+      </div>
+
+      <div class="field" id="extrasField">
+        <label>Add-ons</label>
+        <div class="extras-list">
+          <label class="extra-option extra-option--photo">
+            <img src="img/addon-note-jar.jpg" alt="Note Jar — glass jar of rolled handwritten notes" class="extra-thumb">
+            <input type="checkbox" data-extra="note-jar" data-price="15000">
+            <span class="extra-text">
+              <span class="extra-name">Note Jar</span>
+              <span class="extra-desc">A corked glass jar filled with rolled-up notes — reasons, memories, or little reminders.</span>
+            </span>
+            <span class="extra-price">+₦15,000</span>
+          </label>
+          <label class="extra-option extra-option--photo">
+            <img src="img/addon-vintage-box.jpg" alt="Vintage Box — decorative keepsake box with photo and treats" class="extra-thumb">
+            <input type="checkbox" data-extra="vintage-box" data-price="12000">
+            <span class="extra-text">
+              <span class="extra-name">Vintage Box</span>
+              <span class="extra-desc">A decorative vintage-style keepsake box to hold it all together.</span>
+            </span>
+            <span class="extra-price">+₦12,000</span>
+          </label>
+          <label class="extra-option extra-option--photo">
+            <img src="img/addon-diffuser.jpg" alt="Vintage wrapped reed diffuser" class="extra-thumb">
+            <input type="checkbox" data-extra="diffuser" data-price="11000">
+            <span class="extra-text">
+              <span class="extra-name">Vintage Wrapped Diffuser</span>
+              <span class="extra-desc">A softly scented reed diffuser, wrapped in kraft paper with a handwritten tag.</span>
+            </span>
+            <span class="extra-price">+₦11,000</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field" id="addressField">
+        <label for="deliveryAddress">Delivery address</label>
+        <input type="text" id="deliveryAddress" placeholder="Street, city, state" required>
+      </div>
+
+      <div class="field" id="emailField">
+        <label for="senderEmail">Your email <span style="text-transform:none; font-weight:400;">(for payment receipt)</span></label>
+        <input type="text" id="senderEmail" placeholder="you@email.com" required>
+      </div>
+
+      <div class="order-total" id="orderTotalRow">
+        <span>Total</span>
+        <span id="orderTotal">₦10,000</span>
+      </div>
+
+      <div class="composer-submit">
+        <button type="submit" class="seal-btn" id="submitBtn">
+          <span class="seal-disc" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 2"/></svg>
+          </span>
+          <span class="seal-label" id="submitLabel">Seal &amp; Pay</span>
+        </button>
+        <div class="composer-error" id="formError"></div>
+      </div>
+    </form>
+
+    <!-- ================= LIVE PREVIEW (shown on command) ================= -->
+    <div class="preview-column">
+      <div class="preview-toggle-row">
+        <button type="button" class="btn-ghost" id="previewToggleBtn">Preview your letter</button>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <div class="letter-preview parchment torn-edges" data-paper="papyrus" id="letterPreview">
+          <div class="letter-greeting" id="pvGreeting">My dearest,</div>
+          <div class="letter-body" id="pvBody">Your words will appear here as you write them…</div>
+          <div class="letter-sign" id="pvSign"></div>
+          <div class="letter-seal-mark" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ================= SHARE MODAL ================= -->
+<div class="modal-backdrop" id="shareModal" hidden>
+  <div class="modal-card">
+    <h3>Your letter is sealed.</h3>
+    <p>Share this link with them — it opens straight into their private letter.</p>
+    <div class="share-link-box">
+      <input type="text" id="shareLink" readonly>
+      <button id="copyLinkBtn" type="button">Copy</button>
+    </div>
+    <a href="#" class="btn-ghost" id="whatsappShare" target="_blank" rel="noopener">Share on WhatsApp</a>
+  </div>
+</div>
+
+<script>
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(open));
+  });
+</script>
+<script type="module" src="js/create.js"></script>
+</body>
+</html>

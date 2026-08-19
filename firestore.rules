@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Deploy with: firebase deploy --only firestore:rules
+// These rules assume no user auth: anyone with a letter's document ID
+// (i.e. anyone with the share link) can read that one letter, and can only
+// flip its "opened" flag — never edit its content. Anyone can create a new
+// letter (this happens right after a successful Paystack payment client-side).
+//
+// For production, the safer pattern is to move letter creation behind a
+// Cloud Function that verifies the Paystack transaction server-side before
+// writing to Firestore — see README.md "Going further".
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /letters/{letterId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.resource.data.keys().hasAll(
+        ['senderName','recipientName','message','plan','opened']
+      ) && request.resource.data.opened == false;
+      allow update: if request.resource.data.diff(resource.data).changedKeys().hasOnly(['opened']);
+      allow delete: if false;
+    }
+  }
+}
