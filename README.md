@@ -33,8 +33,8 @@ Your config is already in `js/firebase-config.js`. You still need to:
 
 ## 2. Paystack setup
 
-Every package now carries a real price (from ₦10,000), so Paystack runs on
-every checkout — there's no free tier in the current catalog.
+Physical packages carry a real price (from ₦10,000) and run through Paystack.
+The Virtual Letter is always free and never touches Paystack.
 
 1. Create a [Paystack](https://paystack.com) account and grab your **public
    key** (starts with `pk_test_…` for testing, `pk_live_…` in production).
@@ -100,6 +100,10 @@ files directly (keep the `data-price`/`data-img` attributes on the `<option>`
 and `<input>` elements in `create.html` in sync with what you show on the
 landing page).
 
+**Virtual Letter — Free.** No delivery, no payment. The sender picks a paper
+design, a font, a reveal animation, and a background scene; the recipient
+gets a private link.
+
 **Letters & Scrolls**
 - Ember Letter — ₦10,000 (`img/ember-letter.jpg`)
 - Ember Scroll — ₦13,000 (`img/ember-scroll.jpg`)
@@ -115,6 +119,26 @@ landing page).
 - Note Jar — ₦15,000 (`img/addon-note-jar.jpg`)
 - Vintage Box — ₦12,000 *(placeholder — you didn't give me a price for this one, update it in `create.html`'s add-ons list)* (`img/addon-vintage-box.jpg`)
 - Vintage Wrapped Diffuser — ₦11,000 (`img/addon-diffuser.jpg`)
+
+## The digital reveal system
+
+Every letter — virtual or physical — generates a private `letter.html?id=...`
+link with a fully customizable reveal experience, chosen by the sender on
+`create.html`:
+
+- **Paper designs (6):** Papyrus, Rose, Olive, Midnight, Ivory Lace, Gold Fleck
+- **Fonts (6):** Cormorant (classic serif), Dancing Script, Great Vibes,
+  Parisienne, Playfair Display, Sacramento — all loaded from Google Fonts
+- **Reveal animations (4):** Wax Envelope (tap to break the seal), Unfurling
+  Scroll (untie the ribbon), Blooming Flower (petals open outward), Velvet
+  Curtain (panels slide apart)
+- **Background scenes (5):** Warm Embers, Floating Hearts, Falling Petals,
+  Twinkling Stars, or None (minimal)
+
+These are stored per-letter in Firestore (`paper`, `font`, `animation`,
+`scene` fields) and read by `js/letter.js`, which shows the matching
+animation markup, spins up the matching floating-particle system, and applies
+the chosen paper/font to the letter itself.
 
 ## Going further (recommended before real launch)
 

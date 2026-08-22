@@ -10,7 +10,7 @@
 <div class="grain-overlay" aria-hidden="true"></div>
 
 <main class="reveal-stage" id="stage">
-  <div id="embers"></div>
+  <div id="particles" aria-hidden="true"></div>
 
   <div id="loadingState" class="reveal-loading">Fetching your letter…</div>
 
@@ -18,15 +18,49 @@
     This letter couldn't be found. It may have been the wrong link — ask them to resend it.
   </div>
 
-  <div id="envelopeScene" class="envelope-scene" hidden>
-    <div class="envelope" id="envelope">
+  <!-- ============ Animation: Wax Envelope ============ -->
+  <div class="anim-trigger anim-envelope envelope-scene" id="animEnvelope" hidden>
+    <div class="envelope" id="envelopeGraphic">
       <div class="envelope-flap"></div>
       <div class="envelope-body"></div>
       <div class="envelope-seal" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M4 4l8 7 8-7"/></svg>
       </div>
     </div>
-    <div class="envelope-hint" id="envelopeHint">Tap to break the seal</div>
+    <div class="envelope-hint">Tap to break the seal</div>
+  </div>
+
+  <!-- ============ Animation: Unfurling Scroll ============ -->
+  <div class="anim-trigger anim-scroll" id="animScroll" hidden>
+    <div class="scroll-closed" id="scrollGraphic">
+      <div class="scroll-rod top"></div>
+      <div class="scroll-paper"></div>
+      <div class="scroll-rod bottom"></div>
+      <div class="scroll-ribbon" aria-hidden="true"><div class="scroll-ribbon-knot"></div></div>
+    </div>
+    <div class="envelope-hint">Tap to untie the ribbon</div>
+  </div>
+
+  <!-- ============ Animation: Blooming Flower ============ -->
+  <div class="anim-trigger anim-bloom" id="animBloom" hidden>
+    <div class="bloom-flower" id="bloomGraphic">
+      <div class="bloom-petal"></div><div class="bloom-petal"></div><div class="bloom-petal"></div><div class="bloom-petal"></div>
+      <div class="bloom-petal"></div><div class="bloom-petal"></div><div class="bloom-petal"></div><div class="bloom-petal"></div>
+      <div class="bloom-center"></div>
+    </div>
+    <div class="envelope-hint">Tap to let it bloom</div>
+  </div>
+
+  <!-- ============ Animation: Velvet Curtain ============ -->
+  <div class="anim-trigger anim-curtain" id="animCurtain" hidden>
+    <div class="curtain-stage" id="curtainGraphic">
+      <div class="curtain-panel left"></div>
+      <div class="curtain-panel right"></div>
+      <div class="curtain-center-seal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M4 4l8 7 8-7"/></svg>
+      </div>
+    </div>
+    <div class="envelope-hint">Tap to draw back the curtain</div>
   </div>
 </main>
 
