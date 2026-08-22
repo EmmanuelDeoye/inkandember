@@ -2,7 +2,8 @@ import { db, collection, addDoc, serverTimestamp } from "./firebase-config.js";
 
 // ---------------------------------------------------------------------------
 // ⚠️ Replace with your own Paystack PUBLIC key (starts with pk_).
-// Never put your Paystack SECRET key in frontend code.
+// Never put your Paystack SECRET key in frontend code. Only used for the
+// Physical Package flow — Virtual Letters are always free and skip Paystack.
 // ---------------------------------------------------------------------------
 const PAYSTACK_PUBLIC_KEY = "pk_test_REPLACE_WITH_YOUR_PAYSTACK_PUBLIC_KEY";
 
@@ -13,6 +14,15 @@ const greeting = document.getElementById("greeting");
 const message = document.getElementById("message");
 const signoff = document.getElementById("signoff");
 const charCount = document.getElementById("charCount");
+
+const fontSelect = document.getElementById("fontSelect");
+const animationSelect = document.getElementById("animationSelect");
+const sceneSelect = document.getElementById("sceneSelect");
+
+const modeTabs = document.querySelectorAll(".mode-tab");
+const virtualFields = document.getElementById("virtualFields");
+const physicalFields = document.getElementById("physicalFields");
+
 const planSelect = document.getElementById("plan");
 const planThumb = document.getElementById("planThumb");
 const extrasInputs = document.querySelectorAll('input[data-extra]');
@@ -38,26 +48,38 @@ const whatsappShare = document.getElementById("whatsappShare");
 
 let selectedPaper = "papyrus";
 let previewOpen = false;
+let currentMode = "virtual";
 
-// Pre-select plan from ?plan= query param (set by pricing cards on the landing page)
+// Pre-select plan / mode from ?plan=... or ?mode=... query params
 const urlParams = new URLSearchParams(window.location.search);
 const presetPlan = urlParams.get("plan");
-if (presetPlan && [...planSelect.options].some(o => o.value === presetPlan)) {
+if (presetPlan && planSelect && [...planSelect.options].some(o => o.value === presetPlan)) {
   planSelect.value = presetPlan;
+  currentMode = "physical";
 }
+if (urlParams.get("mode") === "physical") currentMode = "physical";
 
 // ---------------------------------------------------------------------------
-// Plan thumbnail — swaps to match the selected package
+// Mode switch — Virtual Letter (free) vs Physical Package (paid)
 // ---------------------------------------------------------------------------
-function updatePlanThumb() {
-  const img = planSelect.selectedOptions[0].dataset.img;
-  if (img) {
-    planThumb.src = img;
-    planThumb.alt = planSelect.selectedOptions[0].textContent.trim() + " preview";
-  }
+function applyMode() {
+  modeTabs.forEach(tab => {
+    const active = tab.dataset.mode === currentMode;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  virtualFields.hidden = currentMode !== "virtual";
+  physicalFields.hidden = currentMode !== "physical";
+  deliveryAddress.required = currentMode === "physical";
+  senderEmail.required = currentMode === "physical";
+  submitLabel.textContent = currentMode === "virtual" ? "Seal & Send — Free" : "Seal & Pay";
+  if (currentMode === "physical") refreshTotal();
 }
-planSelect.addEventListener("change", updatePlanThumb);
-updatePlanThumb();
+modeTabs.forEach(tab => tab.addEventListener("click", () => {
+  currentMode = tab.dataset.mode;
+  applyMode();
+}));
+applyMode();
 
 // ---------------------------------------------------------------------------
 // Live preview — rendered only on command (button press), not on every keystroke
@@ -67,6 +89,7 @@ function renderPreview() {
   pvBody.textContent = message.value.trim() || "Your words will appear here once you write them…";
   pvSign.textContent = signoff.value.trim() || (senderName.value.trim() ? `— ${senderName.value.trim()}` : "");
   letterPreview.dataset.paper = selectedPaper;
+  letterPreview.dataset.font = fontSelect.value;
 }
 
 previewToggleBtn.addEventListener("click", () => {
@@ -85,6 +108,7 @@ previewToggleBtn.addEventListener("click", () => {
 message.addEventListener("input", () => {
   charCount.textContent = message.value.length;
 });
+fontSelect.addEventListener("change", () => { if (previewOpen) renderPreview(); });
 
 paperSwatches.addEventListener("click", (e) => {
   const swatch = e.target.closest(".swatch");
@@ -96,7 +120,20 @@ paperSwatches.addEventListener("click", (e) => {
 });
 
 // ---------------------------------------------------------------------------
-// Pricing — every package is paid; add-ons stack on top of the base price
+// Plan thumbnail — swaps to match the selected physical package
+// ---------------------------------------------------------------------------
+function updatePlanThumb() {
+  const img = planSelect.selectedOptions[0].dataset.img;
+  if (img) {
+    planThumb.src = img;
+    planThumb.alt = planSelect.selectedOptions[0].textContent.trim() + " preview";
+  }
+}
+planSelect.addEventListener("change", updatePlanThumb);
+updatePlanThumb();
+
+// ---------------------------------------------------------------------------
+// Pricing (physical packages only — virtual letters are always free)
 // ---------------------------------------------------------------------------
 function calcTotal() {
   const planPrice = Number(planSelect.selectedOptions[0].dataset.price);
@@ -111,10 +148,9 @@ function refreshTotal() {
 }
 planSelect.addEventListener("change", refreshTotal);
 extrasInputs.forEach(i => i.addEventListener("change", refreshTotal));
-refreshTotal();
 
 // ---------------------------------------------------------------------------
-// Submit → validate → Paystack → save to Firestore → show share link
+// Submit → validate → (Paystack if physical) → save to Firestore → share link
 // ---------------------------------------------------------------------------
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -124,6 +160,18 @@ form.addEventListener("submit", (e) => {
     formError.textContent = "Please fill in your name, their name, and the letter itself.";
     return;
   }
+
+  if (currentMode === "virtual") {
+    submitBtn.disabled = true;
+    submitLabel.textContent = "Sealing…";
+    saveLetterAndReveal(null).finally(() => {
+      submitBtn.disabled = false;
+      submitLabel.textContent = "Seal & Send — Free";
+    });
+    return;
+  }
+
+  // Physical package flow
   if (!deliveryAddress.value.trim()) {
     formError.textContent = "Please add a delivery address so your package can reach them.";
     return;
@@ -138,7 +186,6 @@ form.addEventListener("submit", (e) => {
   }
 
   const totalNaira = calcTotal();
-
   submitBtn.disabled = true;
   submitLabel.textContent = "Opening payment…";
 
@@ -169,24 +216,34 @@ form.addEventListener("submit", (e) => {
 
 async function saveLetterAndReveal(paymentReference) {
   try {
-    const extras = [...extrasInputs].filter(i => i.checked).map(i => i.dataset.extra);
-
-    const docRef = await addDoc(collection(db, "letters"), {
+    const baseDoc = {
+      type: currentMode, // 'virtual' | 'physical'
       senderName: senderName.value.trim(),
       recipientName: recipientName.value.trim(),
       greeting: greeting.value.trim() || `My dearest ${recipientName.value.trim()},`,
       message: message.value.trim(),
       signoff: signoff.value.trim() || `— ${senderName.value.trim()}`,
       paper: selectedPaper,
-      plan: planSelect.value,
-      extras,
-      deliveryAddress: deliveryAddress.value.trim(),
-      senderEmail: senderEmail.value.trim(),
-      totalNaira: calcTotal(),
-      paymentReference,
+      font: fontSelect.value,
+      animation: animationSelect.value,
+      scene: sceneSelect.value,
       opened: false,
       createdAt: serverTimestamp(),
-    });
+    };
+
+    if (currentMode === "physical") {
+      const extras = [...extrasInputs].filter(i => i.checked).map(i => i.dataset.extra);
+      Object.assign(baseDoc, {
+        plan: planSelect.value,
+        extras,
+        deliveryAddress: deliveryAddress.value.trim(),
+        senderEmail: senderEmail.value.trim(),
+        totalNaira: calcTotal(),
+        paymentReference,
+      });
+    }
+
+    const docRef = await addDoc(collection(db, "letters"), baseDoc);
 
     const link = `${window.location.origin}${window.location.pathname.replace("create.html", "")}letter.html?id=${docRef.id}`;
     shareLink.value = link;
@@ -194,7 +251,11 @@ async function saveLetterAndReveal(paymentReference) {
     shareModal.hidden = false;
   } catch (err) {
     console.error(err);
-    formError.textContent = "Your payment went through, but we couldn't save your letter. Please contact support with your payment reference: " + paymentReference;
+    if (paymentReference) {
+      formError.textContent = "Your payment went through, but we couldn't save your letter. Please contact support with your payment reference: " + paymentReference;
+    } else {
+      formError.textContent = "Something went wrong saving your letter. Please try again.";
+    }
   }
 }
 
